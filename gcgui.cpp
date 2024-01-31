@@ -222,6 +222,7 @@ void gcGui::Initialize() {
 
     medium = io.Fonts->AddFontFromMemoryTTF((void*)InterMedium, sizeof(InterMedium), 15.0f, &font_config, ranges);
     semibold = io.Fonts->AddFontFromMemoryTTF((void*)InterSemiBold, sizeof(InterSemiBold), 17.0f, &font_config, ranges);
+    io.IniFilename = NULL;
 
     IDirect3D9* pD3D = Direct3DCreate9(D3D_SDK_VERSION);
     if (!pD3D) {
