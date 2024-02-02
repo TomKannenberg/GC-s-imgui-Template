@@ -12,6 +12,7 @@
 #include <string>
 
 #include "gfont.hpp"
+#include "resource.h"
 
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")
@@ -20,6 +21,7 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+HMODULE GCM();
 void SetRoundedEdges(HWND hwnd, int width, int height);
 void ResetDevice();
 
@@ -57,18 +59,7 @@ class gcGui {
         ImTextureID        ExitLogoII = NULL;
         LPDIRECT3DTEXTURE9 newTexture = NULL;
 
-        void cSprite(IDirect3DDevice9* m_pD3Ddev, LPWSTR szFilePath) {
-            D3DXIMAGE_INFO pInfo;
-
-            ZeroMemory(&pInfo, sizeof(D3DXIMAGE_INFO));
-            D3DXGetImageInfoFromFile(szFilePath, &pInfo);
-
-            if (FAILED(D3DXCreateTextureFromFileEx(m_pD3Ddev, szFilePath, pInfo.Width, pInfo.Height,
-                pInfo.MipLevels, NULL, pInfo.Format, D3DPOOL_MANAGED, D3DX_DEFAULT, NULL, NULL,
-                NULL, NULL, &newTexture)))
-                MessageBox(NULL, L"Cannot create image texture", L"Error", MB_ICONERROR);
-
-        }
+        void cSprite(IDirect3DDevice9* m_pD3Ddev, LPCSTR resourcename);
 
         ImVec4 c1(const double& r, const double& b, const double& g, const double& a) {
             return ImVec4(r / 256, b / 256, g / 256, a / 256);

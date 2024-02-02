@@ -48,13 +48,13 @@ void gcGui::FrontEnd() {
     ImGui::PushStyleColor(ImGuiCol_Button, purple);
 
     if (ImGui::Button("Button 1", ImVec2(xsize, ysize))) {
-        MessageBox(hwnd, L"I wonder what happens when Button 2 is pressed :O", L"Magical Button Text", 0);
+        MessageBox(hwnd, "I wonder what happens when Button 2 is pressed :O", "Magical Button Text", 0);
     }
 
     ImGui::SetCursorPos(ImVec2(Gui::Size.x / 2 - xsize / 1.75, ysize * 4.5 / 1.6));
 
     if (ImGui::Button("Button 2", ImVec2(xsize, ysize))) {
-        MessageBox(hwnd, L"I wonder what happens when Button 1 is pressed :O", L"Magical Button Text", 0);
+        MessageBox(hwnd, "I wonder what happens when Button 1 is pressed :O", "Magical Button Text", 0);
     }
 
     std::string text = std::to_string(cursorpos.x) + " " + std::to_string(cursorpos.y) + " " + std::to_string(wasDragged) + " " + std::to_string(mouseRecent);
@@ -180,14 +180,11 @@ gcGui::gcGui(std::string pname, std::string version, bool* done) : done(done) {
     name = pname + version;
     initHWND();
     Initialize();
-    LPWSTR logo = LPWSTR(L"Logo.png");
-    cSprite(pDevice, logo);
+    cSprite(pDevice, LPCSTR(GCIMAGE1));
     LogoI = newTexture;
-    LPWSTR exitlogo = LPWSTR(L"Exit.png");
-    cSprite(pDevice, exitlogo);
+    cSprite(pDevice, LPCSTR(GCIMAGE2));
     ExitLogoI = newTexture;
-    LPWSTR exitlogo2 = LPWSTR(L"Exit2.png");
-    cSprite(pDevice, exitlogo2);
+    cSprite(pDevice, LPCSTR(GCIMAGE3));
     ExitLogoII = newTexture;
 }
 
@@ -252,6 +249,25 @@ void gcGui::Initialize() {
     UpdateWindow(hwnd);
 }
 
+void gcGui::cSprite(IDirect3DDevice9* m_pD3Ddev, LPCSTR resourcename) {
+    HRSRC hr = FindResource(GCM(), resourcename, MAKEINTRESOURCE(PNGFILE));
+    HGLOBAL hd = LoadResource(GCM(), hr);
+    DWORD hs = SizeofResource(GCM(), hr);
+    char* hf = (char*)LockResource(hd);
+
+    D3DXIMAGE_INFO pInfo;
+    ZeroMemory(&pInfo, sizeof(D3DXIMAGE_INFO));
+    D3DXGetImageInfoFromFileInMemory(hf, hs, &pInfo);
+
+
+    if (FAILED(D3DXCreateTextureFromFileInMemoryEx(m_pD3Ddev, hd, hs, pInfo.Width, pInfo.Height,
+        pInfo.MipLevels, NULL, pInfo.Format, D3DPOOL_MANAGED, D3DX_DEFAULT, NULL, NULL, NULL, NULL, &newTexture))) {
+
+        MessageBox(NULL, "Cannot create image texture", "Error", MB_ICONERROR);
+    }
+
+}
+
 void gcGui::Shutdown() {
     InvalidateDeviceObjects();
     ImGui_ImplWin32_Shutdown();
@@ -295,7 +311,7 @@ void gcGui::RenderBlur() {
         ULONG ul;
     };
 
-    const HINSTANCE hm = LoadLibrary(L"user32.dll");
+    const HINSTANCE hm = LoadLibrary("user32.dll");
     if (hm) {
         typedef BOOL(WINAPI* pSetWindowCompositionAttribute)(HWND, WINCOMPATTRDATA*);
 
@@ -311,9 +327,9 @@ void gcGui::RenderBlur() {
 
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 void gcGui::initHWND() {
-    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandleA(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
+    WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandleA(NULL), NULL, NULL, NULL, NULL, "GC ImGui Template", NULL };
     ::RegisterClassEx(&wc);
-    hwnd = ::CreateWindowEx(0, wc.lpszClassName, L"Dear ImGui DirectX9 Example", WS_POPUP, (GetSystemMetrics(SM_CXSCREEN) / 2) - (Gui::Size.x / 2), (GetSystemMetrics(SM_CYSCREEN) / 2) - (Gui::Size.y / 2), Gui::Size.x, Gui::Size.y, NULL, NULL, wc.hInstance, NULL);
+    hwnd = ::CreateWindowEx(0, wc.lpszClassName, "GC ImGui Template", WS_POPUP, (GetSystemMetrics(SM_CXSCREEN) / 2) - (Gui::Size.x / 2), (GetSystemMetrics(SM_CYSCREEN) / 2) - (Gui::Size.y / 2), Gui::Size.x, Gui::Size.y, NULL, NULL, wc.hInstance, NULL);
 
     SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & (WS_SYSMENU));
     SetWindowLongA(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
@@ -328,6 +344,16 @@ void gcGui::initHWND() {
 
     auto pref = DWMWCP_ROUND;
     HRESULT result = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &pref, sizeof(int));
+}
+
+HMODULE GCM() {
+    HMODULE hm = NULL;
+    GetModuleHandleEx(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+        (LPCTSTR)GCM,
+        &hm
+    );
+    return hm;
 }
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
