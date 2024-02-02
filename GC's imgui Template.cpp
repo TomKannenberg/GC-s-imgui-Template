@@ -19,5 +19,5 @@ int main() {
         
     }
 
-    exit(1); // figured debugging imgui's shutdown issue outside of my paygrade, to avoid the program running after this we explicitly say exit and hope 🤞🏻
+    exit(1);
 }
